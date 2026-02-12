@@ -1,51 +1,36 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using ProjectManagement.Application.Common;
+using ProjectManagement.Application.DTOs;
+using ProjectManagement.Application.Interfaces;
+using System.Security.Claims;
 
 namespace ProjectManagement.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] // All endpoints require authentication
+[Authorize]
 public class ProjectsController : ControllerBase
 {
+    private readonly IProjectService _projectService;
     private readonly ILogger<ProjectsController> _logger;
 
-    public ProjectsController(ILogger<ProjectsController> logger)
+    public ProjectsController(IProjectService projectService, ILogger<ProjectsController> logger)
     {
+        _projectService = projectService;
         _logger = logger;
     }
 
     [HttpGet]
-    public IActionResult GetAllProjects([FromQuery] PaginationParams paginationParams)
+    public async Task<IActionResult> GetProjects([FromQuery] PaginationParams paginationParams)
     {
-        _logger.LogInformation("Getting all projects with pagination: Page {Page}, Size {Size}", 
-            paginationParams.PageNumber, paginationParams.PageSize);
-
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
         var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-        // Sample data
-        var allProjects = Enumerable.Range(1, 50)
-            .Select(i => new { Id = i, Name = $"Project {i}", Status = i % 2 == 0 ? "Active" : "Completed" })
-            .AsEnumerable();
+        _logger.LogInformation("User {UserId} ({Email}) is requesting projects", userId, userEmail);
 
-        // Apply search if provided
-        if (!string.IsNullOrWhiteSpace(paginationParams.SearchTerm))
-        {
-            allProjects = allProjects.Where(p => 
-                p.Name.Contains(paginationParams.SearchTerm, StringComparison.OrdinalIgnoreCase));
-        }
-
-        // Apply pagination
-        var pagedResult = allProjects.ToPagedResult(
-            paginationParams.PageNumber, 
-            paginationParams.PageSize);
-
-        _logger.LogInformation("Returning {Count} projects out of {Total}", 
-            pagedResult.Items.Count, pagedResult.TotalCount);
+        var pagedResult = await _projectService.GetAllProjectsAsync(paginationParams);
 
         return Ok(new
         {
@@ -66,131 +51,136 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetProjectById(Guid id)
+    public async Task<IActionResult> GetProjectById(Guid id)
     {
         _logger.LogInformation("Getting project by ID: {ProjectId}", id);
 
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var project = await _projectService.GetProjectByIdAsync(id);
         
-        return Ok(new 
-        { 
-            message = $"Project details for {id}",
-            userId,
-            projectId = id
-        });
+        if (project == null)
+        {
+            _logger.LogWarning("Project not found: {ProjectId}", id);
+            return NotFound(new { message = $"Project with ID {id} not found" });
+        }
+
+        return Ok(project);
     }
 
     [HttpPost]
-    [Authorize(Roles = "Manager,Admin")] // Only Manager or Admin can create
-    public IActionResult CreateProject([FromBody] object projectData)
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<IActionResult> CreateProject([FromBody] CreateProjectDto dto)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-        _logger.LogInformation("User {UserId} with role {Role} is creating a new project", userId, userRole);
+        _logger.LogInformation("User {UserId} with role {Role} is creating a new project: {ProjectName}", 
+            userId, userRole, dto.Name);
 
-        return Ok(new 
-        { 
-            message = "Project created successfully",
-            createdBy = userId,
-            role = userRole
-        });
+        var project = await _projectService.CreateProjectAsync(dto, userId);
+
+        _logger.LogInformation("Project created successfully: {ProjectId} - {ProjectName}", 
+            project.Id, project.Name);
+
+        return CreatedAtAction(nameof(GetProjectById), new { id = project.Id }, project);
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Manager,Admin")] // Only Manager or Admin can update
-    public IActionResult UpdateProject(Guid id, [FromBody] object projectData)
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<IActionResult> UpdateProject(Guid id, [FromBody] UpdateProjectDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         _logger.LogInformation("User {UserId} is updating project {ProjectId}", userId, id);
 
-        return Ok(new 
-        { 
-            message = $"Project {id} updated successfully",
-            updatedBy = userId
-        });
+        var project = await _projectService.UpdateProjectAsync(id, dto);
+        
+        if (project == null)
+        {
+            _logger.LogWarning("Project not found for update: {ProjectId}", id);
+            return NotFound(new { message = $"Project with ID {id} not found" });
+        }
+
+        _logger.LogInformation("Project updated successfully: {ProjectId}", id);
+
+        return Ok(project);
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")] // Only Admin can delete
-    public IActionResult DeleteProject(Guid id)
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteProject(Guid id)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         _logger.LogWarning("User {UserId} is deleting project {ProjectId}", userId, id);
 
-        return Ok(new 
-        { 
-            message = $"Project {id} deleted successfully",
-            deletedBy = userId
-        });
+        var success = await _projectService.DeleteProjectAsync(id);
+        
+        if (!success)
+        {
+            _logger.LogWarning("Project not found for deletion: {ProjectId}", id);
+            return NotFound(new { message = $"Project with ID {id} not found" });
+        }
+
+        _logger.LogInformation("Project deleted successfully: {ProjectId}", id);
+
+        return Ok(new { message = $"Project {id} deleted successfully" });
     }
 
-    [HttpGet("public")]
-    [AllowAnonymous] // Override controller-level [Authorize]
-    public IActionResult GetPublicProjects([FromQuery] PaginationParams paginationParams)
+    [HttpPost("{projectId}/members/{userId}")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<IActionResult> AddMemberToProject(Guid projectId, Guid userId)
     {
-        _logger.LogInformation("Getting public projects");
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        var publicProjects = Enumerable.Range(1, 20)
-            .Select(i => new { Id = i, Name = $"Public Project {i}" })
-            .AsEnumerable();
+        _logger.LogInformation("User {CurrentUserId} is adding user {UserId} to project {ProjectId}", 
+            currentUserId, userId, projectId);
 
-        var pagedResult = publicProjects.ToPagedResult(
-            paginationParams.PageNumber,
-            paginationParams.PageSize);
+        var success = await _projectService.AddMemberToProjectAsync(projectId, userId);
+        
+        if (!success)
+        {
+            _logger.LogWarning("Failed to add member to project. Project: {ProjectId}, User: {UserId}", 
+                projectId, userId);
+            return BadRequest(new { message = "Failed to add member. Project or user not found, or user is already a member." });
+        }
 
-        return Ok(new 
-        { 
-            message = "Public projects - no authentication required",
-            pagination = new
-            {
-                pagedResult.PageNumber,
-                pagedResult.PageSize,
-                pagedResult.TotalPages,
-                pagedResult.TotalCount
-            },
-            data = pagedResult.Items
-        });
+        _logger.LogInformation("Member added successfully. Project: {ProjectId}, User: {UserId}", 
+            projectId, userId);
+
+        return Ok(new { message = "Member added successfully" });
     }
 
-    [HttpGet("admin-only")]
-    [Authorize(Policy = "AdminOnly")] // Using policy
-    public IActionResult GetAdminData()
+    [HttpDelete("{projectId}/members/{userId}")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<IActionResult> RemoveMemberFromProject(Guid projectId, Guid userId)
     {
-        var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        _logger.LogInformation("Admin {Email} is accessing admin-only data", userEmail);
+        _logger.LogInformation("User {CurrentUserId} is removing user {UserId} from project {ProjectId}", 
+            currentUserId, userId, projectId);
 
-        return Ok(new 
-        { 
-            message = "Admin-only data",
-            adminEmail = userEmail
-        });
-    }
+        var success = await _projectService.RemoveMemberFromProjectAsync(projectId, userId);
+        
+        if (!success)
+        {
+            _logger.LogWarning("Failed to remove member from project. Project: {ProjectId}, User: {UserId}", 
+                projectId, userId);
+            return NotFound(new { message = "Member not found in project" });
+        }
 
-    [HttpGet("manager-dashboard")]
-    [Authorize(Policy = "ManagerOrAdmin")] // Using policy
-    public IActionResult GetManagerDashboard()
-    {
-        var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+        _logger.LogInformation("Member removed successfully. Project: {ProjectId}, User: {UserId}", 
+            projectId, userId);
 
-        _logger.LogInformation("User with role {Role} is accessing manager dashboard", userRole);
-
-        return Ok(new 
-        { 
-            message = "Manager dashboard",
-            role = userRole,
-            dashboardData = new { totalProjects = 10, activeProjects = 7 }
-        });
-    }
-
-    [HttpGet("test-error")]
-    [AllowAnonymous]
-    public IActionResult TestError()
-    {
-        _logger.LogWarning("Test error endpoint called - throwing exception");
-        throw new InvalidOperationException("This is a test exception to demonstrate global error handling");
+        return Ok(new { message = "Member removed successfully" });
     }
 }

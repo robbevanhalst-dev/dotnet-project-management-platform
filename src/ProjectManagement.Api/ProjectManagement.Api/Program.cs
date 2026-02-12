@@ -67,7 +67,6 @@ try
             policy.RequireClaim(System.Security.Claims.ClaimTypes.Email));
     });
 
-    // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
 
     // Swagger configuration with JWT support
@@ -100,7 +99,11 @@ try
         });
     });
 
+    // Register Services
     builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<IProjectService, ProjectService>();
+    builder.Services.AddScoped<ITaskService, TaskService>();
+    builder.Services.AddScoped<IUserService, UserService>();
 
     var app = builder.Build();
 

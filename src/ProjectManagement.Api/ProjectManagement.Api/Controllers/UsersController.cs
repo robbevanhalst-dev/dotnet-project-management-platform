@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProjectManagement.Application.Common;
+using ProjectManagement.Application.DTOs;
+using ProjectManagement.Application.Interfaces;
 using System.Security.Claims;
 
 namespace ProjectManagement.Api.Controllers;
@@ -9,106 +12,148 @@ namespace ProjectManagement.Api.Controllers;
 [Authorize]
 public class UsersController : ControllerBase
 {
-    [HttpGet("profile")]
-    public IActionResult GetMyProfile()
-    {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    private readonly IUserService _userService;
+    private readonly ILogger<UsersController> _logger;
 
-        return Ok(new 
-        { 
-            userId, 
-            email, 
-            role, 
-            isAuthenticated,
-            claims = User.Claims.Select(c => new { c.Type, c.Value })
-        });
+    public UsersController(IUserService userService, ILogger<UsersController> logger)
+    {
+        _userService = userService;
+        _logger = logger;
     }
 
-    [HttpPut("profile")]
-    public IActionResult UpdateMyProfile([FromBody] object profileData)
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetMyProfile()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        return Ok(new 
-        { 
-            message = "Profile updated successfully",
-            userId
-        });
+        _logger.LogInformation("User {UserId} is requesting their profile", userId);
+
+        var user = await _userService.GetUserByIdAsync(userId);
+
+        if (user == null)
+        {
+            _logger.LogWarning("User profile not found: {UserId}", userId);
+            return NotFound(new { message = "User not found" });
+        }
+
+        return Ok(user);
     }
 
     [HttpGet]
-    [Authorize(Policy = "AdminOnly")]
-    public IActionResult GetAllUsers()
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllUsers([FromQuery] PaginationParams paginationParams)
     {
-        return Ok(new 
-        { 
-            message = "All users (Admin only)",
-            users = new[] 
-            { 
-                new { id = 1, email = "user1@example.com", role = "User" },
-                new { id = 2, email = "manager@example.com", role = "Manager" },
-                new { id = 3, email = "admin@example.com", role = "Admin" }
-            }
+        var adminEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+        _logger.LogInformation("Admin {Email} is requesting all users", adminEmail);
+
+        var pagedResult = await _userService.GetAllUsersAsync(paginationParams);
+
+        return Ok(new
+        {
+            pagination = new
+            {
+                pagedResult.PageNumber,
+                pagedResult.PageSize,
+                pagedResult.TotalPages,
+                pagedResult.TotalCount,
+                pagedResult.HasPrevious,
+                pagedResult.HasNext
+            },
+            data = pagedResult.Items
         });
     }
 
     [HttpGet("{id}")]
     [Authorize(Roles = "Manager,Admin")]
-    public IActionResult GetUserById(Guid id)
+    public async Task<IActionResult> GetUserById(Guid id)
     {
-        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var currentUserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        return Ok(new 
-        { 
-            message = $"User details for {id}",
-            requestedBy = currentUserId
-        });
+        _logger.LogInformation("User {CurrentUserId} is requesting user {UserId}", currentUserId, id);
+
+        var user = await _userService.GetUserByIdAsync(id);
+
+        if (user == null)
+        {
+            _logger.LogWarning("User not found: {UserId}", id);
+            return NotFound(new { message = $"User with ID {id} not found" });
+        }
+
+        return Ok(user);
     }
 
     [HttpPut("{id}/role")]
-    [Authorize(Policy = "AdminOnly")]
-    public IActionResult UpdateUserRole(Guid id, [FromBody] object roleData)
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] UpdateUserRoleDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var adminId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        return Ok(new 
-        { 
-            message = $"User {id} role updated",
-            updatedBy = adminId
-        });
+        _logger.LogInformation("Admin {AdminId} is updating role for user {UserId} to {Role}", 
+            adminId, id, dto.Role);
+
+        var success = await _userService.UpdateUserRoleAsync(id, dto.Role);
+
+        if (!success)
+        {
+            _logger.LogWarning("User not found for role update: {UserId}", id);
+            return NotFound(new { message = $"User with ID {id} not found" });
+        }
+
+        _logger.LogInformation("User role updated successfully: {UserId} to {Role}", id, dto.Role);
+
+        return Ok(new { message = "User role updated successfully", userId = id, newRole = dto.Role });
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Policy = "AdminOnly")]
-    public IActionResult DeleteUser(Guid id)
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteUser(Guid id)
     {
         var adminId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var currentUserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        return Ok(new 
-        { 
-            message = $"User {id} deleted",
-            deletedBy = adminId
-        });
+        // Prevent admin from deleting themselves
+        if (id == currentUserId)
+        {
+            _logger.LogWarning("Admin {AdminId} attempted to delete their own account", adminId);
+            return BadRequest(new { message = "You cannot delete your own account" });
+        }
+
+        _logger.LogWarning("Admin {AdminId} is deleting user {UserId}", adminId, id);
+
+        var success = await _userService.DeleteUserAsync(id);
+
+        if (!success)
+        {
+            _logger.LogWarning("User not found for deletion: {UserId}", id);
+            return NotFound(new { message = $"User with ID {id} not found" });
+        }
+
+        _logger.LogInformation("User deleted successfully: {UserId}", id);
+
+        return Ok(new { message = $"User {id} deleted successfully" });
     }
 
     [HttpGet("managers")]
     [Authorize(Roles = "Manager,Admin")]
-    public IActionResult GetManagers()
+    public async Task<IActionResult> GetManagers()
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        return Ok(new 
-        { 
-            message = "List of managers",
-            requestedByRole = role,
-            managers = new[] 
-            { 
-                new { id = 1, email = "manager1@example.com" },
-                new { id = 2, email = "manager2@example.com" }
-            }
+        _logger.LogInformation("User {UserId} is requesting list of managers", userId);
+
+        var managers = await _userService.GetManagersAsync();
+
+        return Ok(new
+        {
+            message = "Managers and Admins",
+            count = managers.Count,
+            data = managers
         });
     }
 }

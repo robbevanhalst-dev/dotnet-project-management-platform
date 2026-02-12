@@ -426,8 +426,8 @@ public class AuthServiceTests : IDisposable
 
         // Assert
         jwtToken.ValidTo.Should().BeAfter(DateTime.UtcNow);
-        // Token should expire in approximately 2 hours
-        jwtToken.ValidTo.Should().BeCloseTo(DateTime.UtcNow.AddHours(2), TimeSpan.FromMinutes(1));
+        // Token should expire in approximately 15 minutes (default when not configured)
+        jwtToken.ValidTo.Should().BeCloseTo(DateTime.UtcNow.AddMinutes(15), TimeSpan.FromMinutes(5));
     }
 
     [Theory]

@@ -66,21 +66,23 @@ public class AuthService : IAuthService
         }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
-
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, user.Role)
-    };
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
+        };
+
+        // Get expiration from configuration (default to 15 minutes)
+        var expirationMinutes = int.TryParse(jwtSettings["AccessTokenExpirationMinutes"], out var minutes) ? minutes : 15;
 
         var token = new JwtSecurityToken(
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(2),
+            expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
             signingCredentials: creds
         );
 
@@ -217,10 +219,13 @@ public class AuthService : IAuthService
         var randomBytes = new byte[64];
         rngCryptoServiceProvider.GetBytes(randomBytes);
 
+        // Get expiration from configuration (default to 7 days)
+        var expirationDays = int.TryParse(_configuration["Jwt:RefreshTokenExpirationDays"], out var days) ? days : 7;
+
         return new RefreshToken
         {
             Token = Convert.ToBase64String(randomBytes),
-            ExpiresAt = DateTime.UtcNow.AddDays(7), // 7 days expiration
+            ExpiresAt = DateTime.UtcNow.AddDays(expirationDays),
             CreatedAt = DateTime.UtcNow,
             CreatedByIp = ipAddress
         };
