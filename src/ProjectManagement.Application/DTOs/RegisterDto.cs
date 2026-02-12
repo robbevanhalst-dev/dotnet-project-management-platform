@@ -17,5 +17,7 @@ public class RegisterDto
     [Required]
     [MinLength(6)]
     public string Password { get; set; } = string.Empty;
+
+    public string Role { get; set; } = "User"; // Default role
 }
 
