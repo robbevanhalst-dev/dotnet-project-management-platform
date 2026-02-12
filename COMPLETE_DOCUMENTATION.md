@@ -713,10 +713,8 @@ var authService = new AuthService();
 **GitHub:** https://github.com/robbevanhalst-dev  
 **Repository:** https://github.com/robbevanhalst-dev/dotnet-project-management-platform
 
-**Documentation:**
-- RBAC_GUIDE.md
-- REFRESH_TOKEN_GUIDE.md
-- MIDDLEWARE_LOGGING_PAGINATION_GUIDE.md
+**Additional Documentation:**
+- RBAC_GUIDE.md - Detailed Role-Based Access Control guide
 
 ---
 
