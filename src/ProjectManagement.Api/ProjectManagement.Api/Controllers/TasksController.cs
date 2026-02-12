@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using ProjectManagement.Application.Common;
 
 namespace ProjectManagement.Api.Controllers;
 
@@ -8,30 +9,58 @@ namespace ProjectManagement.Api.Controllers;
 [Route("api/[controller]")]
 public class TasksController : ControllerBase
 {
+    private readonly ILogger<TasksController> _logger;
+
+    public TasksController(ILogger<TasksController> logger)
+    {
+        _logger = logger;
+    }
+
     [HttpGet("status")]
     [AllowAnonymous] // Public endpoint
     public IActionResult GetApiStatus()
     {
+        _logger.LogInformation("API status check requested");
         return Ok(new { status = "operational", timestamp = DateTime.UtcNow });
     }
 
     [HttpGet]
     [Authorize] // Requires authentication
-    public IActionResult GetMyTasks()
+    public IActionResult GetMyTasks([FromQuery] PaginationParams paginationParams)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
+        _logger.LogInformation("User {UserId} is fetching their tasks", userId);
+
+        // Sample data
+        var allTasks = Enumerable.Range(1, 30)
+            .Select(i => new
+            {
+                id = i,
+                title = $"Task {i}",
+                status = i % 3 == 0 ? "Completed" : i % 2 == 0 ? "In Progress" : "Pending"
+            })
+            .AsEnumerable();
+
+        var pagedResult = allTasks.ToPagedResult(
+            paginationParams.PageNumber,
+            paginationParams.PageSize);
+
         return Ok(new 
         { 
-            message = "Your tasks",
             userId,
             userEmail,
-            tasks = new[] 
-            { 
-                new { id = 1, title = "Task 1", status = "In Progress" },
-                new { id = 2, title = "Task 2", status = "Completed" }
-            }
+            pagination = new
+            {
+                pagedResult.PageNumber,
+                pagedResult.PageSize,
+                pagedResult.TotalPages,
+                pagedResult.TotalCount,
+                pagedResult.HasPrevious,
+                pagedResult.HasNext
+            },
+            data = pagedResult.Items
         });
     }
 
@@ -40,6 +69,8 @@ public class TasksController : ControllerBase
     public IActionResult GetTaskById(Guid id)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        _logger.LogInformation("User {UserId} is fetching task {TaskId}", userId, id);
 
         return Ok(new 
         { 
@@ -56,6 +87,8 @@ public class TasksController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
+        _logger.LogInformation("User {UserId} with role {Role} is creating a new task", userId, userRole);
+
         return Ok(new 
         { 
             message = "Task created successfully",
@@ -70,6 +103,8 @@ public class TasksController : ControllerBase
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+        _logger.LogInformation("User {UserId} is updating task {TaskId}", userId, id);
+
         return Ok(new 
         { 
             message = $"Task {id} updated successfully",
@@ -82,6 +117,8 @@ public class TasksController : ControllerBase
     public IActionResult DeleteTask(Guid id)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        _logger.LogWarning("User {UserId} is deleting task {TaskId}", userId, id);
 
         return Ok(new 
         { 
@@ -96,6 +133,8 @@ public class TasksController : ControllerBase
     {
         var managerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+        _logger.LogInformation("Manager {ManagerId} is assigning task {TaskId}", managerId, id);
+
         return Ok(new 
         { 
             message = $"Task {id} assigned successfully",
@@ -105,17 +144,34 @@ public class TasksController : ControllerBase
 
     [HttpGet("all")]
     [Authorize(Policy = "AdminOnly")]
-    public IActionResult GetAllTasks()
+    public IActionResult GetAllTasks([FromQuery] PaginationParams paginationParams)
     {
+        _logger.LogInformation("Admin is fetching all tasks with pagination");
+
+        var allTasks = Enumerable.Range(1, 150)
+            .Select(i => new
+            {
+                id = i,
+                title = $"Task {i}",
+                assignedTo = $"User {(i % 10) + 1}"
+            })
+            .AsEnumerable();
+
+        var pagedResult = allTasks.ToPagedResult(
+            paginationParams.PageNumber,
+            paginationParams.PageSize);
+
         return Ok(new 
         { 
             message = "All tasks in the system (Admin only)",
-            totalTasks = 150,
-            tasks = new[] 
-            { 
-                new { id = 1, title = "Task 1", assignedTo = "User 1" },
-                new { id = 2, title = "Task 2", assignedTo = "User 2" }
-            }
+            pagination = new
+            {
+                pagedResult.PageNumber,
+                pagedResult.PageSize,
+                pagedResult.TotalPages,
+                pagedResult.TotalCount
+            },
+            data = pagedResult.Items
         });
     }
 }
