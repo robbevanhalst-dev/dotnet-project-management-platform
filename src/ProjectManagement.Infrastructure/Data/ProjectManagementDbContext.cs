@@ -19,6 +19,7 @@ public class ProjectManagementDbContext : DbContext
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,6 +42,18 @@ public class ProjectManagementDbContext : DbContext
             .WithMany()
             .HasForeignKey(t => t.AssignedUserId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // RefreshToken -> User
+        modelBuilder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany(u => u.RefreshTokens)
+            .HasForeignKey(rt => rt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Index on RefreshToken.Token for faster lookups
+        modelBuilder.Entity<RefreshToken>()
+            .HasIndex(rt => rt.Token)
+            .IsUnique();
     }
 }
 
