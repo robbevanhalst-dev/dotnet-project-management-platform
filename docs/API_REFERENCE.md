@@ -5,7 +5,7 @@ Complete reference for all API endpoints.
 ## Base URL
 
 ```
-https://localhost:7264/api
+https://localhost:5001/api
 ```
 
 ## Authentication

@@ -32,24 +32,24 @@ Or in Visual Studio:
 
 ## Access the API
 
-- **Swagger UI:** https://localhost:7264/swagger
-- **API Base:** https://localhost:7264/api
+- **Swagger UI:** https://localhost:5001/swagger
+- **API Base:** https://localhost:5001/api
 
 ## Quick Test
 
 ```bash
 # 1. Register Admin
-curl -X POST https://localhost:7264/api/auth/register \
+curl -X POST https://localhost:5001/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@test.com","password":"Admin123","role":"Admin"}'
 
 # 2. Authenticate
-curl -X POST https://localhost:7264/api/auth/authenticate \
+curl -X POST https://localhost:5001/api/auth/authenticate \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@test.com","password":"Admin123"}'
 
 # 3. Get Projects (use accessToken from response)
-curl https://localhost:7264/api/projects \
+curl https://localhost:5001/api/projects \
   -H "Authorization: Bearer {YOUR_ACCESS_TOKEN}"
 ```
 

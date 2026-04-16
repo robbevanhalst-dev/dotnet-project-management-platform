@@ -63,7 +63,7 @@ Authorization: Bearer {manager-token}
 # Response: 403 Forbidden
 ```
 
-**Solution:** Check required role in [RBAC_GUIDE.md](../RBAC_GUIDE.md)
+**Solution:** Check required role in [Security Guide (RBAC section)](SECURITY.md)
 
 **2. Resource-based authorization:**
 ```csharp
