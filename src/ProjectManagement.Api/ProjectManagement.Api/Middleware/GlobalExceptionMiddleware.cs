@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using ProjectManagement.Api.Models;
 
 namespace ProjectManagement.Api.Middleware;
 
@@ -96,14 +97,6 @@ public class GlobalExceptionMiddleware
 
         await response.WriteAsync(result);
     }
-}
-
-public class ErrorResponse
-{
-    public bool Success { get; set; }
-    public int StatusCode { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public string? Details { get; set; }
 }
 
 public static class GlobalExceptionMiddlewareExtensions
