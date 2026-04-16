@@ -1,4 +1,5 @@
 # Project Management Platform API
+# Project Management Platform API
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![C#](https://img.shields.io/badge/C%23-13.0-239120?logo=csharp)](https://learn.microsoft.com/dotnet/csharp/)
@@ -19,7 +20,7 @@ This project showcases modern enterprise patterns and best practices that go bey
 ? **JWT Authentication** with refresh token rotation  
 ? **Role-Based Access Control** (3 role hierarchy)  
 ? **Comprehensive Testing** with 72 unit tests  
-? **Professional Documentation** (10+ docs)  
+? **Professional Documentation** (8 docs)  
 ? **Security Best Practices** (token rotation, password hashing, XSS protection)  
 
 **What makes this different:**
@@ -88,12 +89,9 @@ This project showcases modern enterprise patterns and best practices that go bey
 
 **Documentation:**
 - Swagger/OpenAPI
-- 10+ Markdown documentation files
+- 8 Markdown documentation files
 
 ---
-
-## ?? Quick Start
-
 
 ## ?? Quick Start
 
@@ -119,8 +117,8 @@ dotnet run --project src/ProjectManagement.Api/ProjectManagement.Api
 ```
 
 **Access the API:**
-- Swagger UI: https://localhost:7264/swagger
-- API Base: https://localhost:7264/api
+- Swagger UI: https://localhost:5001/swagger
+- API Base: https://localhost:5001/api
 
 ?? **For detailed setup instructions, see [Getting Started Guide](docs/GETTING_STARTED.md)**
 
@@ -164,6 +162,8 @@ Infrastructure ?
 
 ?? **For detailed architecture documentation, see [Architecture Guide](docs/ARCHITECTURE.md)**
 
+---
+
 ## ?? Security
 
 **JWT Authentication** with **Refresh Token Rotation**
@@ -178,6 +178,8 @@ Infrastructure ?
 - ?? 3-Tier RBAC (User/Manager/Admin)
 
 ?? **For complete security documentation, see [Security Guide](docs/SECURITY.md)**
+
+---
 
 ## ? Testing
 
@@ -226,15 +228,14 @@ Building this project was an intensive learning experience that took me beyond t
 
 ## ?? Documentation
 
-Complete documentation suite (10+ documents):
+Complete documentation suite (8 documents):
 
 | Document | Description |
 |----------|-------------|
 | **[Documentation Overview](docs/DOCUMENTATION_OVERVIEW.md)** | Complete documentation index |
 | **[Getting Started](docs/GETTING_STARTED.md)** | Installation & quick start guide |
 | **[API Reference](docs/API_REFERENCE.md)** | Complete endpoint documentation |
-| **[Security Guide](docs/SECURITY.md)** | Authentication & authorization details |
-| **[RBAC Guide](docs/RBAC_GUIDE.md)** | Role-based access control patterns |
+| **[Security Guide](docs/SECURITY.md)** | Authentication & authorization (includes RBAC) |
 | **[Architecture](docs/ARCHITECTURE.md)** | Clean Architecture deep dive |
 | **[Database](docs/DATABASE.md)** | Schema design & migrations |
 | **[Configuration](docs/CONFIGURATION.md)** | Settings & environment setup |
@@ -345,7 +346,7 @@ I'm a recently graduated .NET developer passionate about clean code, software ar
 
 **Project Metrics:**
 - **72 Unit Tests** - 100% passing
-- **10+ Documentation Files** - Complete guides
+- **8 Documentation Files** - Complete guides
 - **4 Architecture Layers** - Clean separation
 - **3 Role Levels** - RBAC implementation
 - **~2,000 lines of code** - Production quality
