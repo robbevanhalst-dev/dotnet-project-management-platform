@@ -1,4 +1,4 @@
-﻿# Getting Started
+# Getting Started
 
 Quick guide to install and run the Project Management Platform API.
 

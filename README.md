@@ -1,4 +1,3 @@
-ï»¿# Project Management Platform API
 # Project Management Platform API
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
@@ -10,18 +9,19 @@
 
 ---
 
-## ?? About This Project
+## About This Project
 
 I built this **Project Management API** as a comprehensive portfolio piece to demonstrate **production-ready .NET development skills**. 
 
 This project showcases modern enterprise patterns and best practices that go beyond typical tutorial projects:
 
-? **Clean Architecture** with proper layer separation  
-? **JWT Authentication** with refresh token rotation  
-? **Role-Based Access Control** (3 role hierarchy)  
-? **Comprehensive Testing** with 72 unit tests  
-? **Professional Documentation** (8 docs)  
-? **Security Best Practices** (token rotation, password hashing, XSS protection)  
+**Key Highlights:**
+- Clean Architecture with proper layer separation
+- JWT Authentication with refresh token rotation
+- Role-Based Access Control (3 role hierarchy)
+- Comprehensive Testing with 72 unit tests
+- Professional Documentation (8 docs)
+- Security Best Practices (token rotation, password hashing, XSS protection)
 
 **What makes this different:**
 - Not a simple CRUD app - implements real-world security patterns
@@ -33,9 +33,9 @@ This project showcases modern enterprise patterns and best practices that go bey
 
 ---
 
-## ?? Key Features
+## Key Features
 
-### ?? Security First
+### Security First
 - **JWT + Refresh Tokens** (15min access / 7-day refresh)
 - **Token Rotation** (automatic on refresh - prevents replay attacks)
 - **HTTP-only Cookies** (XSS protection)
@@ -43,14 +43,14 @@ This project showcases modern enterprise patterns and best practices that go bey
 - **IP Address Tracking** (audit trail)
 - **Role-Based Authorization** (3 levels: User, Manager, Admin)
 
-### ??? Clean Architecture
+### Clean Architecture
 - **4-Layer Separation** (Domain ? Application ? Infrastructure ? API)
 - **Dependency Inversion** (Domain has zero dependencies)
 - **Interface Segregation** (IAuthService, IProjectService, etc.)
 - **Repository Pattern** (via EF Core DbContext)
 - **DTOs** (no entity exposure to API)
 
-### ?? Production Quality
+### Production Quality
 - **Structured Logging** (Serilog with file + console outputs)
 - **Global Exception Handling** (custom middleware)
 - **Pagination & Search** (all list endpoints)
@@ -58,10 +58,9 @@ This project showcases modern enterprise patterns and best practices that go bey
 - **Swagger/OpenAPI** (interactive documentation)
 - **72 Unit Tests** (FluentAssertions + in-memory DB)
 
-
 ---
 
-## ??? Tech Stack
+## Tech Stack
 
 **Core Framework:**
 - .NET 9.0
@@ -93,7 +92,7 @@ This project showcases modern enterprise patterns and best practices that go bey
 
 ---
 
-## ?? Quick Start
+## Quick Start
 
 ### Prerequisites
 - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
@@ -120,11 +119,11 @@ dotnet run --project src/ProjectManagement.Api/ProjectManagement.Api
 - Swagger UI: https://localhost:5001/swagger
 - API Base: https://localhost:5001/api
 
-?? **For detailed setup instructions, see [Getting Started Guide](docs/GETTING_STARTED.md)**
+**For detailed setup instructions, see [Getting Started Guide](docs/GETTING_STARTED.md)**
 
 ---
 
-## ?? API Endpoints
+## API Endpoints
 
 ### Quick Overview
 
@@ -137,15 +136,15 @@ dotnet run --project src/ProjectManagement.Api/ProjectManagement.Api
 - `/api/users/*` - User management (profile + admin)
 
 **Authorization Levels:**
-- ?? **User** - View own data, update assigned tasks
-- ?? **Manager** - Create projects/tasks, manage teams
-- ?? **Admin** - Full system access
+- **User** - View own data, update assigned tasks
+- **Manager** - Create projects/tasks, manage teams
+- **Admin** - Full system access
 
-?? **For complete endpoint documentation, see [API Reference](docs/API_REFERENCE.md)**
+**For complete endpoint documentation, see [API Reference](docs/API_REFERENCE.md)**
 
 ---
 
-## ??? Architecture
+## Architecture
 
 **Clean Architecture** (4-layer separation):
 
@@ -156,45 +155,46 @@ Infrastructure ?
 ```
 
 **Key Principles:**
-- ? Domain has zero dependencies
-- ? Application defines interfaces, Infrastructure implements
-- ? Dependency Inversion via DI
+- Domain has zero dependencies
+- Application defines interfaces, Infrastructure implements
+- Dependency Inversion via DI
 
-?? **For detailed architecture documentation, see [Architecture Guide](docs/ARCHITECTURE.md)**
+**For detailed architecture documentation, see [Architecture Guide](docs/ARCHITECTURE.md)**
 
 ---
 
-## ?? Security
+## Security
 
 **JWT Authentication** with **Refresh Token Rotation**
 
 **Flow:** Register ? Login ? Access Token (15min) + Refresh Token (7 days) ? Auto-rotation
 
 **Key Features:**
-- ?? Token Rotation (anti-replay)
-- ?? HTTP-Only Cookies (XSS protection)
-- ?? PBKDF2 Password Hashing
-- ?? IP Tracking & Audit Trail
-- ?? 3-Tier RBAC (User/Manager/Admin)
+- Token Rotation (anti-replay)
+- HTTP-Only Cookies (XSS protection)
+- PBKDF2 Password Hashing
+- IP Tracking & Audit Trail
+- 3-Tier RBAC (User/Manager/Admin)
 
-?? **For complete security documentation, see [Security Guide](docs/SECURITY.md)**
+**For complete security documentation, see [Security Guide](docs/SECURITY.md)**
 
 ---
 
-## ? Testing
+## Testing
 
-**72 Unit Tests** with **100% pass rate** - AuthService (22) â€¢ ProjectService (18) â€¢ TaskService (20) â€¢ UserService (12)
+**72 Unit Tests** with **100% pass rate**
+
+AuthService (22) • ProjectService (18) • TaskService (20) • UserService (12)
 
 ```bash
-dotnet test  # ? 72/72 passing in ~6 seconds
+dotnet test  # 72/72 passing in ~6 seconds
 ```
 
-?? **For detailed testing guide, see [Testing Documentation](docs/TESTING.md)**
-
+**For detailed testing guide, see [Testing Documentation](docs/TESTING.md)**
 
 ---
 
-## ?? What I Learned
+## What I Learned
 
 Building this project was an intensive learning experience that took me beyond tutorials into production-ready development:
 
@@ -218,15 +218,15 @@ Building this project was an intensive learning experience that took me beyond t
 - Use MediatR for CQRS pattern (better separation of commands/queries)
 
 ### Next Steps for This Project
-- [ ] Deploy to Azure with CI/CD pipeline
-- [ ] Add Docker containerization
-- [ ] Implement code coverage reporting
-- [ ] Add API versioning
-- [ ] Create Postman collection for testing
+- Deploy to Azure with CI/CD pipeline
+- Add Docker containerization
+- Implement code coverage reporting
+- Add API versioning
+- Create Postman collection for testing
 
 ---
 
-## ?? Documentation
+## Documentation
 
 Complete documentation suite (8 documents):
 
@@ -244,14 +244,14 @@ Complete documentation suite (8 documents):
 
 ---
 
-## ?? Use Cases
+## Use Cases
 
 **This project is ideal for:**
 
-? **Portfolio Showcase** - Demonstrates production-ready .NET skills  
-? **Job Interviews** - Complete talking points on architecture, security, testing  
-? **Learning Reference** - Study real-world implementation of Clean Architecture  
-? **Starter Template** - Foundation for building SaaS applications  
+- **Portfolio Showcase** - Demonstrates production-ready .NET skills
+- **Job Interviews** - Complete talking points on architecture, security, testing
+- **Learning Reference** - Study real-world implementation of Clean Architecture
+- **Starter Template** - Foundation for building SaaS applications
 
 **What it demonstrates:**
 - Enterprise-grade API design patterns
@@ -262,7 +262,7 @@ Complete documentation suite (8 documents):
 
 ---
 
-## ?? Configuration
+## Configuration
 
 ### Environment Setup
 
@@ -286,15 +286,14 @@ Complete documentation suite (8 documents):
 - See `appsettings.Example.json` for template
 
 ### Important Security Notes
-?? **Do NOT commit secrets to Git**  
-? Use `appsettings.Example.json` as template  
-? Copy to `appsettings.Development.json` and add your secrets  
-? Add `appsettings.Development.json` to `.gitignore`
+**WARNING:** Do NOT commit secrets to Git  
+**TIP:** Use `appsettings.Example.json` as template  
+**TIP:** Copy to `appsettings.Development.json` and add your secrets  
+**TIP:** Add `appsettings.Development.json` to `.gitignore`
 
 ---
 
-
-## ?? Contributing
+## Contributing
 
 Contributions, issues, and feature requests are welcome!
 
@@ -313,13 +312,13 @@ Contributions, issues, and feature requests are welcome!
 
 ---
 
-## ?? License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## ????? Author
+## Author
 
 **Robbe Vanhalst**  
 *Junior .NET Developer | Belgium*
@@ -337,7 +336,7 @@ I'm a recently graduated .NET developer passionate about clean code, software ar
 
 ---
 
-## ?? Project Stats
+## Project Stats
 
 ![Language](https://img.shields.io/badge/Language-C%23_13-239120?logo=csharp)
 ![Framework](https://img.shields.io/badge/Framework-.NET_9-512BD4?logo=dotnet)
@@ -353,30 +352,6 @@ I'm a recently graduated .NET developer passionate about clean code, software ar
 
 ---
 
-## ?? Acknowledgments
+**Star this repository if you find it useful!**
 
-- Clean Architecture principles by Robert C. Martin
-- ASP.NET Core documentation by Microsoft
-- JWT best practices from OWASP
-- Testing patterns from the xUnit community
-
----
-
-## ? Support
-
-If you find this project useful or it helped you learn something new:
-
-- ? **Star this repository**
-- ?? **Report issues** if you find any
-- ?? **Suggest features** via GitHub issues
-- ?? **Share with others** learning .NET
-
----
-
-**?? Last Updated:** January 2025  
-**?? Version:** 1.0.0  
-**?? Status:** Active Development
-
----
-
-*Built with ?? and lots of ? by Robbe Vanhalst*
+**Made with care by Robbe Vanhalst**

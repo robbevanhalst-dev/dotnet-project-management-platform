@@ -1,10 +1,10 @@
-﻿# Documentation Guide
+# Documentation Guide
 
 Complete documentation for the Project Management Platform API.
 
 ---
 
-## ?? Quick Navigation
+## Quick Navigation
 
 ### New to the Project?
 
@@ -16,24 +16,24 @@ Complete documentation for the Project Management Platform API.
 ### I'm a Developer
 
 **Building Features:**
-- ??? [Architecture](ARCHITECTURE.md) - Understand the codebase structure
-- ??? [Database](DATABASE.md) - Schema & migrations
-- ? [Testing](TESTING.md) - Write & run tests
-- ?? [Configuration](CONFIGURATION.md) - Environment setup
+- [Architecture](ARCHITECTURE.md) - Understand the codebase structure
+- [Database](DATABASE.md) - Schema & migrations
+- [Testing](TESTING.md) - Write & run tests
+- [Configuration](CONFIGURATION.md) - Environment setup
 
 **Need Help:**
-- ?? [Troubleshooting](TROUBLESHOOTING.md) - Common issues & solutions
+- [Troubleshooting](TROUBLESHOOTING.md) - Common issues & solutions
 
 ### I'm Reviewing Security
 
 **Security Documentation:**
-- ?? [Security Guide](SECURITY.md) - Authentication flow, JWT, RBAC
-- ?? [Configuration](CONFIGURATION.md) - Secrets management
-- ??? [Database](DATABASE.md) - Data security & relationships
+- [Security Guide](SECURITY.md) - Authentication flow, JWT, RBAC
+- [Configuration](CONFIGURATION.md) - Secrets management
+- [Database](DATABASE.md) - Data security & relationships
 
 ---
 
-## ?? Complete Documentation Index
+## Complete Documentation Index
 
 | Document | Description | When to Read |
 |----------|-------------|--------------|
@@ -48,7 +48,7 @@ Complete documentation for the Project Management Platform API.
 
 ---
 
-## ?? Common Workflows
+## Common Workflows
 
 ### First Time Setup
 
@@ -79,7 +79,7 @@ Complete documentation for the Project Management Platform API.
 
 ---
 
-## ?? Find by Topic
+## Find by Topic
 
 **Authentication & Security:**
 - JWT tokens ? [Security](SECURITY.md)
@@ -119,11 +119,11 @@ Complete documentation for the Project Management Platform API.
 
 ---
 
-## ?? Additional Resources
+## Additional Resources
 
 - **[Main README](../README.md)** - Project overview
-- **[Swagger UI](https://localhost:7264/swagger)** - Interactive API testing
+- **[Swagger UI](https://localhost:5001/swagger)** - Interactive API testing
 
 ---
 
-*?? Tip: Use Ctrl+F to search for specific topics in each document.*
+**TIP:** Use Ctrl+F to search for specific topics in each document.

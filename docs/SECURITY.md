@@ -1,4 +1,4 @@
-﻿# Security Guide
+# Security Guide
 
 Authentication, authorization, and security features.
 
