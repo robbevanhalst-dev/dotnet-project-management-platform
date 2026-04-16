@@ -11,10 +11,10 @@ Unit tests, test coverage, and testing strategies.
 ## Test Statistics
 
 **72 Unit Tests** (100% passing):
-- ? AuthService (22 tests)
-- ? ProjectService (18 tests)
-- ? TaskService (20 tests)
-- ? UserService (12 tests)
+- AuthService (22 tests)
+- ProjectService (18 tests)
+- TaskService (20 tests)
+- UserService (12 tests)
 
 **Coverage:** ~95%  
 **Duration:** ~6 seconds

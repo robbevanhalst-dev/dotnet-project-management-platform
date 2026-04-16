@@ -184,7 +184,7 @@ POST /api/auth/register
 
 #### Test in Swagger UI
 
-1. Open `https://localhost:7264/swagger`
+1. Open `https://localhost:5001/swagger`
 2. Click **Authorize** button
 3. Enter: `Bearer {your-token}`
 4. Click **Authorize**
@@ -194,22 +194,22 @@ POST /api/auth/register
 
 ```bash
 # Login as Admin
-curl -X POST https://localhost:7264/api/auth/authenticate \
+curl -X POST https://localhost:5001/api/auth/authenticate \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@test.com","password":"Password123"}'
 
 # Access protected endpoint
-curl -X GET https://localhost:7264/api/projects \
+curl -X GET https://localhost:5001/api/projects \
   -H "Authorization: Bearer {your-token}"
 
 # Test authorization (expect 403 for User role)
-curl -X DELETE https://localhost:7264/api/projects/{id} \
+curl -X DELETE https://localhost:5001/api/projects/{id} \
   -H "Authorization: Bearer {user-token}"
 ```
 
 ## Security Best Practices
 
-### ? DO
+### DO
 
 - Use short-lived access tokens (15 minutes)
 - Rotate refresh tokens on each use
@@ -219,7 +219,7 @@ curl -X DELETE https://localhost:7264/api/projects/{id} \
 - Log security events
 - Hash passwords (PBKDF2)
 
-### ? DON'T
+### DON'T
 
 - Store tokens in localStorage (XSS risk)
 - Use long-lived access tokens (>1 hour)
