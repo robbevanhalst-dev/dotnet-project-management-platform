@@ -1,4 +1,4 @@
-# Documentation Guide
+﻿# Documentation Guide
 
 Complete documentation for the Project Management Platform API.
 

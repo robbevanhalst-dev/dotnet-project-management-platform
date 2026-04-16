@@ -1,4 +1,4 @@
-# Configuration Guide
+﻿# Configuration Guide
 
 Application configuration, environment variables, and security setup.
 

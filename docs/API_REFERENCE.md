@@ -1,4 +1,4 @@
-# API Reference
+﻿# API Reference
 
 Complete reference for all API endpoints.
 

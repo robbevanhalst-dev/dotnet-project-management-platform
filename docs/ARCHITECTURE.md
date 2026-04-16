@@ -1,4 +1,4 @@
-# Architecture Guide
+﻿# Architecture Guide
 
 Clean Architecture implementation and design patterns.
 

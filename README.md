@@ -1,4 +1,4 @@
-# Project Management Platform API
+ï»¿# Project Management Platform API
 # Project Management Platform API
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
@@ -183,7 +183,7 @@ Infrastructure ?
 
 ## ? Testing
 
-**72 Unit Tests** with **100% pass rate** - AuthService (22) • ProjectService (18) • TaskService (20) • UserService (12)
+**72 Unit Tests** with **100% pass rate** - AuthService (22) â€¢ ProjectService (18) â€¢ TaskService (20) â€¢ UserService (12)
 
 ```bash
 dotnet test  # ? 72/72 passing in ~6 seconds

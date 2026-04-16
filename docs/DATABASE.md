@@ -1,4 +1,4 @@
-# Database Guide
+﻿# Database Guide
 
 Database schema, migrations, and Entity Framework Core configuration.
 
