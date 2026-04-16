@@ -212,5 +212,4 @@ Content-Type: application/json
 ---
 
 **See also:**
-- [Security Guide](SECURITY.md) - Authorization details
-- [RBAC Guide](RBAC_GUIDE.md) - Role-based access control
+- [Security Guide](SECURITY.md) - Authentication, authorization & RBAC
