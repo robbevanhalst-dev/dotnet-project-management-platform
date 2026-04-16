@@ -1,6 +1,49 @@
 # Configuration Guide
 
-Application configuration, environment variables, and settings.
+Application configuration, environment variables, and security setup.
+
+## ?? Quick Security Setup
+
+**IMPORTANT:** Never commit secrets to Git!
+
+### Step 1: Copy Example Configuration
+
+```bash
+cd src/ProjectManagement.Api/ProjectManagement.Api
+copy appsettings.Example.json appsettings.Development.json
+```
+
+### Step 2: Generate Secure JWT Key
+
+**PowerShell (Windows):**
+```powershell
+-join ((48..57) + (65..90) + (97..122) | Get-Random -Count 32 | ForEach-Object {[char]$_})
+```
+
+**Linux/macOS:**
+```bash
+openssl rand -base64 32
+```
+
+### Step 3: Update Configuration
+
+Open `appsettings.Development.json` and replace:
+```json
+{
+  "Jwt": {
+    "Key": "YOUR_GENERATED_SECRET_KEY_HERE"
+  }
+}
+```
+
+### Step 4: Verify Gitignore
+
+```bash
+git check-ignore src/ProjectManagement.Api/ProjectManagement.Api/appsettings.Development.json
+# Should output the path (meaning it's ignored ?)
+```
+
+---
 
 ## Configuration Files
 
@@ -301,6 +344,70 @@ app.MapHealthChecks("/health");
 
 ---
 
+## ?? Security Best Practices
+
+### ? What NOT to Do
+
+- Don't commit `appsettings.Development.json` to Git
+- Don't use weak/short secrets (minimum 32 characters)
+- Don't share secrets in chat/email
+- Don't use the same secret across environments
+- Don't store secrets in source code comments
+
+### ? What to Do
+
+- Use strong, randomly generated keys (32+ characters)
+- Use different secrets for Dev/Staging/Production
+- Use environment variables in production
+- Use Azure Key Vault or AWS Secrets Manager for production
+- Rotate secrets regularly
+- Use User Secrets for local development
+
+### Production Secrets Management
+
+**Azure Key Vault:**
+```bash
+# Create Key Vault
+az keyvault create --name your-keyvault --resource-group your-rg
+
+# Add secret
+az keyvault secret set --vault-name your-keyvault --name JwtKey --value "your-secret"
+```
+
+**Update Program.cs:**
+```csharp
+if (builder.Environment.IsProduction())
+{
+    var keyVaultName = builder.Configuration["KeyVaultName"];
+    builder.Configuration.AddAzureKeyVault(
+        new Uri($"https://{keyVaultName}.vault.azure.net/"),
+        new DefaultAzureCredential());
+}
+```
+
+**Environment Variables (Docker/Linux):**
+```bash
+export Jwt__Key="your-production-secret"
+export ConnectionStrings__DefaultConnection="Server=prod;..."
+```
+
+### Security Checklist
+
+Before deploying:
+
+- [ ] `appsettings.Development.json` is in `.gitignore`
+- [ ] JWT Key is strong (32+ characters, random)
+- [ ] Different secrets for Dev/Staging/Production
+- [ ] Secrets stored in Key Vault (production)
+- [ ] No secrets in source code or comments
+- [ ] Connection strings use environment variables
+- [ ] HTTPS enabled (production)
+- [ ] CORS configured properly
+- [ ] Rate limiting enabled (production)
+
+---
+
 **See also:**
-- [SECURITY.md](SECURITY.md) - Security configuration
+- [SECURITY.md](SECURITY.md) - Authentication & authorization
 - [DATABASE.md](DATABASE.md) - Database configuration
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common configuration issues

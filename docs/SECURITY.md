@@ -41,12 +41,26 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## Authorization
 
-### Roles
+### Role Hierarchy
+
+This project implements a **3-tier Role-Based Access Control (RBAC)** system:
 
 ```
-Admin    ? Full system access
-Manager  ? Project/task management
-User     ? Own data only
+???????????
+?  Admin  ? ? Full system access (user management, all CRUD operations)
+???????????
+? Manager ? ? Project/task creation, team management, view all data
+???????????
+?  User   ? ? View own data, update assigned tasks
+???????????
+```
+
+**Role Constants:**
+```csharp
+// ProjectManagement.Domain.Constants.Roles
+public const string Admin = "Admin";
+public const string Manager = "Manager";
+public const string User = "User";
 ```
 
 ### Authorization Attributes
@@ -58,6 +72,61 @@ User     ? Own data only
 [Authorize(Policy = "AdminOnly")]     // Policy-based
 [AllowAnonymous]                      // Public endpoint
 ```
+
+### Authorization Policies
+
+Configured in `Program.cs`:
+
+```csharp
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("ManagerOnly", policy => policy.RequireRole("Manager"));
+    options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole("Manager", "Admin"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+    options.AddPolicy("RequireEmail", policy => 
+        policy.RequireClaim(ClaimTypes.Email));
+});
+```
+
+### API Endpoints by Role
+
+#### Authentication (Public)
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/auth/register` | POST | - | Register user |
+| `/api/auth/authenticate` | POST | - | Login (JWT + refresh token) |
+| `/api/auth/refresh-token` | POST | - | Refresh access token |
+| `/api/auth/logout` | POST | User | Logout |
+
+#### Projects
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/projects` | GET | User | Get projects (paginated) |
+| `/api/projects/{id}` | GET | User | Get project by ID |
+| `/api/projects` | POST | Manager+ | Create project |
+| `/api/projects/{id}` | PUT | Manager+ | Update project |
+| `/api/projects/{id}` | DELETE | Admin | Delete project |
+| `/api/projects/{projectId}/members/{userId}` | POST | Manager+ | Add member |
+| `/api/projects/{projectId}/members/{userId}` | DELETE | Manager+ | Remove member |
+
+#### Tasks
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/tasks` | GET | User | Get my tasks |
+| `/api/tasks/all` | GET | Admin | Get all tasks |
+| `/api/tasks/{id}` | GET | User | Get task by ID |
+| `/api/tasks` | POST | Manager+ | Create task |
+| `/api/tasks/{id}` | PUT | User | Update task |
+| `/api/tasks/{id}` | DELETE | Manager+ | Delete task |
+
+#### Users
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/users/profile` | GET | User | Get my profile |
+| `/api/users` | GET | Admin | Get all users |
+| `/api/users/{id}` | GET | Manager+ | Get user by ID |
+| `/api/users/{id}/role` | PUT | Admin | Update role |
 
 ### Resource-Based Authorization
 
@@ -72,6 +141,70 @@ Example:
 var canAccess = await _taskService.CanUserAccessTaskAsync(taskId, userId, userRole);
 if (!canAccess)
     return Forbid();
+```
+
+### HTTP Status Codes
+
+| Code | Meaning | When |
+|------|---------|------|
+| 200 | OK | Success |
+| 401 | Unauthorized | Not logged in / token expired |
+| 403 | Forbidden | Logged in but insufficient permissions |
+| 400 | Bad Request | Invalid data |
+| 404 | Not Found | Resource not found |
+
+### Testing Authorization
+
+#### Register Users with Different Roles
+
+```bash
+# User (default)
+POST /api/auth/register
+{
+  "email": "user@test.com",
+  "password": "Password123"
+}
+
+# Manager
+POST /api/auth/register
+{
+  "email": "manager@test.com",
+  "password": "Password123",
+  "role": "Manager"
+}
+
+# Admin
+POST /api/auth/register
+{
+  "email": "admin@test.com",
+  "password": "Password123",
+  "role": "Admin"
+}
+```
+
+#### Test in Swagger UI
+
+1. Open `https://localhost:7264/swagger`
+2. Click **Authorize** button
+3. Enter: `Bearer {your-token}`
+4. Click **Authorize**
+5. Test endpoints with different roles
+
+#### cURL Examples
+
+```bash
+# Login as Admin
+curl -X POST https://localhost:7264/api/auth/authenticate \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@test.com","password":"Password123"}'
+
+# Access protected endpoint
+curl -X GET https://localhost:7264/api/projects \
+  -H "Authorization: Bearer {your-token}"
+
+# Test authorization (expect 403 for User role)
+curl -X DELETE https://localhost:7264/api/projects/{id} \
+  -H "Authorization: Bearer {user-token}"
 ```
 
 ## Security Best Practices
@@ -97,8 +230,20 @@ if (!canAccess)
 ## Password Security
 
 **Requirements:**
-- Minimum 6 characters
-- Must contain letters and numbers
+- Minimum 8 characters
+- At least 1 uppercase letter
+- At least 1 lowercase letter
+- At least 1 number
+
+**Valid Examples:**
+- `Password123`
+- `MySecure1Pass`
+- `Admin2024!`
+
+**Invalid Examples:**
+- `pass` (too short)
+- `password` (no uppercase, no number)
+- `PASSWORD123` (no lowercase)
 
 **Hashing:**
 - Algorithm: PBKDF2
@@ -198,5 +343,6 @@ builder.Services.AddCors(options =>
 ---
 
 **See also:**
-- [RBAC Guide](RBAC_GUIDE.md) - Detailed authorization guide
+- [API Reference](API_REFERENCE.md) - Complete endpoint documentation
 - [Configuration](CONFIGURATION.md) - Security configuration
+- [Troubleshooting](TROUBLESHOOTING.md) - Common authentication issues

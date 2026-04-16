@@ -399,6 +399,24 @@ FodyWeavers.xsd
 # VS Code files for those working on multiple tools
 .vscode/*
 !.vscode/settings.json
+
+##
+## CUSTOM RULES FOR THIS PROJECT
+##
+
+# Sensitive configuration files - DO NOT COMMIT
+appsettings.Development.json
+appsettings.Staging.json
+appsettings.Production.json
+
+# Keep example configuration file
+!appsettings.Example.json
+
+# Logs directory
+Logs/
+
+# User secrets
+secrets.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
